@@ -1,0 +1,97 @@
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.brand-section {
+    text-align: center;
+    padding: 30px 20px 20px;
+}
+
+.brand-section .logo img {
+    height: 60px;
+    margin-bottom: 15px;
+}
+
+.brand-section h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #0071e3;
+}
+
+.subtitle {
+    color: #86868b;
+    margin-top: 5px;
+}
+
+.login-form {
+    padding: 0 30px 20px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #86868b;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #0071e3;
+    outline: none;
+}
+
+.button {
+    width: 100%;
+    padding: 12px;
+    background: #0071e3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.button:hover {
+    background: #0077ed;
+}
+
+.error-message {
+    text-align: center;
+    margin-top: 15px;
+    min-height: 20px;
+}
+
+.login-footer {
+    text-align: center;
+    padding: 15px;
+    border-top: 1px solid #eaeaea;
+}
+
+.link {
+    color: #0071e3;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}

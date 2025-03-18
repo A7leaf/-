@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/admin-login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="brand-section">
+                <div class="logo">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo">
+                </div>
+                <h1>管理员登录</h1>
+                <p class="subtitle">系统管理控制台</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" placeholder="管理员用户名" id="adminUsername">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="密码" id="adminPassword">
+                </div>
+                <button type="button" class="button" id="loginButton">登录</button>
+                <p class="error-message" id="errorMessage"></p>
+            </div>
+            
+            <div class="login-footer">
+                <p><a href="index.html" class="link">返回用户登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // API基础URL
+    const API_BASE_URL = 'http://182.92.84.86/api';
+    
+    // 登录按钮点击事件
+    document.getElementById('loginButton').addEventListener('click', function() {
+        const username = document.getElementById('adminUsername').value;
+        const password = document.getElementById('adminPassword').value;
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (!username || !password) {
+            errorMessage.textContent = '请填写所有必填字段';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        errorMessage.textContent = '登录中...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 使用API进行登录验证
+        fetch(`${API_BASE_URL}/auth/admin-login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 登录成功
+                errorMessage.textContent = '登录成功！正在跳转...';
+                errorMessage.style.color = '#34c759';
+                
+                // 保存token到sessionStorage
+                sessionStorage.setItem('admin_token', data.token);
+                sessionStorage.setItem('admin_username', username);
+                
+                // 跳转到管理控制台
+                setTimeout(() => {
+                    window.location.href = 'admin-dashboard.html';
+                }, 1000);
+            } else {
+                // 登录失败
+                errorMessage.textContent = data.message || '用户名或密码错误';
+                errorMessage.style.color = '#ff3b30';
+            }
+        })
+        .catch(error => {
+            console.error('登录请求失败:', error);
+            errorMessage.textContent = '服务器连接失败，请稍后再试';
+            errorMessage.style.color = '#ff3b30';
+        });
+    });
+    </script>
+</body>
+</html>

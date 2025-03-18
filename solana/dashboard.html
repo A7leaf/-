@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-logo-container">
+                <div class="logo">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo">
+                </div>
+                <span class="logo-text">Solana</span>
+            </div>
+            <div class="user-info">
+                <span id="userName">用户</span>
+                <button id="logoutButton" class="logout-btn">退出登录</button>
+            </div>
+        </header>
+
+        <div class="welcome-section">
+            <h1>欢迎回来，<span id="welcomeName">用户</span></h1>
+            <p>您的账户已连接到 Solana 网络</p>
+        </div>
+
+        <div class="wallet-section">
+            <div class="wallet-header">
+                <h2>我的钱包</h2>
+                <button class="action-btn secondary" id="refreshWallet">
+                    <i class="fas fa-sync-alt"></i> 刷新
+                </button>
+            </div>
+            
+            <div class="wallet-balance">0.00 SOL</div>
+            <p class="wallet-price">≈ $0.00 USD</p>
+            
+            <div class="wallet-address">
+                <span>钱包地址：</span>
+                <div class="address-text" id="walletAddress">未连接钱包</div>
+                <button class="copy-btn" id="copyAddress" title="复制地址">
+                    <i class="far fa-copy"></i>
+                </button>
+            </div>
+            
+            <div class="wallet-actions">
+                <button class="action-btn" id="connectWallet">
+                    <i class="fas fa-plug"></i> 连接钱包
+                </button>
+                <button class="action-btn secondary" id="importWallet">
+                    <i class="fas fa-download"></i> 导入钱包
+                </button>
+                <button class="action-btn secondary" id="createWallet">
+                    <i class="fas fa-plus"></i> 创建钱包
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-cards">
+            <div class="card" id="sendCard">
+                <div class="card-icon">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <h3>发送</h3>
+                <p>向其他钱包发送 SOL 或代币</p>
+            </div>
+            <div class="card" id="receiveCard">
+                <div class="card-icon">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <h3>接收</h3>
+                <p>查看您的钱包地址和二维码</p>
+            </div>
+            <div class="card" id="swapCard">
+                <div class="card-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h3>兑换</h3>
+                <p>在不同代币之间进行兑换</p>
+            </div>
+            <div class="card" id="historyCard">
+                <div class="card-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3>交易历史</h3>
+                <p>查看您的交易记录</p>
+            </div>
+            <div class="card" id="stakingCard">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>质押</h3>
+                <p>质押您的 SOL 以赚取奖励</p>
+            </div>
+            <div class="card" id="nftCard">
+                <div class="card-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <h3>NFT</h3>
+                <p>管理您的 NFT 收藏</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入钱包模态框 -->
+    <div id="importWalletModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">导入钱包</h2>
+            <p>请输入您的钱包私钥或助记词以导入钱包。</p>
+            
+            <div class="modal-description">
+                <label class="modal-label">私钥或助记词</label>
+                <textarea id="privateKeyInput" class="modal-textarea"></textarea>
+            </div>
+            
+            <div class="modal-description">
+                <label class="modal-label">钱包密码 (可选)</label>
+                <input type="password" id="walletPassword" class="modal-input">
+                <p class="modal-hint">设置密码可以加密您的钱包信息</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="cancelImport" class="modal-cancel-btn">取消</button>
+                <button id="confirmImport" class="modal-confirm-btn">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建钱包模态框 -->
+    <div id="createWalletModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">创建新钱包</h2>
+            <p>系统将为您生成一个新的 Solana 钱包。请务必保存您的助记词！</p>
+            
+            <div class="modal-description">
+                <label class="modal-label">您的助记词</label>
+                <div id="seedPhrase" class="modal-seed-phrase"></div>
+                <p class="modal-warning">警告：请将此助记词保存在安全的地方，任何人获得此助记词都可以控制您的钱包！</p>
+            </div>
+            
+            <div class="modal-description">
+                <label class="modal-label">钱包密码 (可选)</label>
+                <input type="password" id="newWalletPassword" class="modal-input">
+                <p class="modal-hint">设置密码可以加密您的钱包信息</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="cancelCreate" class="modal-cancel-btn">取消</button>
+                <button id="confirmCreate" class="modal-confirm-btn">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 检查用户登录状态
+    function checkAuth() {
+        const currentUser = localStorage.getItem('current_user');
+        const rememberLogin = localStorage.getItem('remember_login');
+        const sessionLogin = sessionStorage.getItem('login_session');
+        
+        if (!currentUser || (!rememberLogin && !sessionLogin)) {
+            alert('请先登录');
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
+    
+    // 加载用户信息
+    function loadUserInfo() {
+        const currentUser = JSON.parse(localStorage.getItem('current_user') || '{}');
+        const userName = currentUser.name || '用户';
+        
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('welcomeName').textContent = userName;
+        
+        // 加载钱包信息
+        loadWalletInfo();
+    }
+    
+    // 退出登录
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        const currentUser = JSON.parse(localStorage.getItem('current_user') || '{}');
+        
+        // 清除登录状态
+        localStorage.removeItem('current_user');
+        localStorage.removeItem('remember_login');
+        sessionStorage.removeItem('login_session');
+        
+        // 记录退出日志
+        if (currentUser.email) {
+            addUserLog(currentUser.email, '用户退出登录');
+        }
+        
+        // 跳转到登录页
+        window.location.href = 'index.html';
+    });
+    </script>
+</body>
+</html>

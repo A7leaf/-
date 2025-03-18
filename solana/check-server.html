@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API服务器检查</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .status-checking {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .details {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .endpoint {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API服务器状态检查</h1>
+        
+        <div class="status status-checking" id="status">
+            正在检查服务器状态...
+        </div>
+        
+        <button id="checkButton">重新检查</button>
+        
+        <div class="details">
+            <h2>API端点信息</h2>
+            <div class="endpoint">http://182.92.84.86/api/health</div>
+            <div class="endpoint">http://182.92.84.86/api/auth/login</div>
+            <div class="endpoint">http://182.92.84.86/api/auth/register</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://182.92.84.86/api';
+        const statusElement = document.getElementById('status');
+        const checkButton = document.getElementById('checkButton');
+        
+        function updateStatus(message, type) {
+            statusElement.textContent = message;
+            statusElement.className = `status status-${type}`;
+        }
+        
+        async function checkServer() {
+            updateStatus('正在检查服务器状态...', 'checking');
+            
+            try {
+                // 使用fetch尝试连接API服务器
+                const response = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    timeout: 5000
+                });
+                
+                updateStatus('API服务器正常运行中!', 'success');
+            } catch (error) {
+                updateStatus(`无法连接到API服务器: ${error.message}`, 'error');
+                console.error('服务器检查失败:', error);
+            }
+        }
+        
+        // 页面加载时检查服务器状态
+        window.addEventListener('DOMContentLoaded', checkServer);
+        
+        // 点击按钮时重新检查
+        checkButton.addEventListener('click', checkServer);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建账号 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 移除 Netlify Identity 相关代码 -->
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="brand-section">
+                <div class="logo">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo">
+                </div>
+                <h1>创建 Solana 账号</h1>
+                <p class="subtitle">加入 Web3 生态系统</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" placeholder="姓名" id="name">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" placeholder="电子邮箱" id="email">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="密码" id="password">
+                    <i class="fas fa-eye-slash password-toggle" id="passwordToggle"></i>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="确认密码" id="confirmPassword">
+                    <i class="fas fa-eye-slash password-toggle" id="confirmPasswordToggle"></i>
+                </div>
+                <div class="terms">
+                    <label>
+                        <input type="checkbox" id="terms">
+                        <span>我同意 <a href="#" class="link">服务条款</a> 和 <a href="#" class="link">隐私政策</a></span>
+                    </label>
+                </div>
+                <button type="button" class="button" id="registerButton">创建账号</button>
+                <p class="error-message" id="errorMessage"></p>
+            </div>
+            
+            <div class="divider">
+                <hr><span>或</span><hr>
+            </div>
+
+            <div class="social-login">
+                <button class="social-btn apple">
+                    <i class="fab fa-apple"></i>
+                    使用 Apple 注册
+                </button>
+                <button class="social-btn google">
+                    <i class="fab fa-google"></i>
+                    使用 Google 注册
+                </button>
+            </div>
+            
+            <div class="login-footer">
+                <p>已有账号？ <a href="index.html" class="link">登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 密码可见性切换
+    document.getElementById('passwordToggle').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const icon = this;
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    });
+    
+    document.getElementById('confirmPasswordToggle').addEventListener('click', function() {
+        const passwordInput = document.getElementById('confirmPassword');
+        const icon = this;
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    });
+    
+    // 社交注册按钮点击事件
+    document.querySelector('.social-btn.apple').addEventListener('click', function() {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '正在使用 Apple 账号注册...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 模拟注册成功
+        setTimeout(() => {
+            const mockUser = {
+                name: 'Apple 用户',
+                email: 'apple_user_' + Math.floor(Math.random() * 1000) + '@example.com',
+                createdAt: new Date().toISOString()
+            };
+            
+            handleRegistrationSuccess(mockUser);
+        }, 1000);
+    });
+    
+    document.querySelector('.social-btn.google').addEventListener('click', function() {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '正在使用 Google 账号注册...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 模拟注册成功
+        setTimeout(() => {
+            const mockUser = {
+                name: 'Google 用户',
+                email: 'google_user_' + Math.floor(Math.random() * 1000) + '@example.com',
+                createdAt: new Date().toISOString()
+            };
+            
+            handleRegistrationSuccess(mockUser);
+        }, 1000);
+    });
+    
+    document.getElementById('registerButton').addEventListener('click', function() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const terms = document.getElementById('terms').checked;
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // 检查系统设置
+        const settings = JSON.parse(localStorage.getItem('system_settings') || '{}');
+        
+        // 检查是否允许注册
+        if (settings.allowRegistration === false) {
+            errorMessage.textContent = '系统当前不允许新用户注册，请联系管理员';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        // 验证表单
+        if (!name || !email || !password || !confirmPassword) {
+            errorMessage.textContent = '请填写所有必填字段';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            errorMessage.textContent = '两次输入的密码不一致';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        if (!terms) {
+            errorMessage.textContent = '请同意服务条款和隐私政策';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        errorMessage.textContent = '注册中...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 从本地存储获取现有用户
+        const users = JSON.parse(localStorage.getItem('solana_users') || '[]');
+        
+        // 检查邮箱是否已被注册
+        if (users.some(user => user.email === email)) {
+            errorMessage.textContent = '该邮箱已被注册';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        // 创建新用户对象
+        const newUser = {
+            name: name,
+            email: email,
+            password: password,
+            createdAt: new Date().toISOString(),
+            verified: !settings.requireEmailVerification // 如果不需要邮箱验证，则直接设为已验证
+        };
+        
+        // 添加新用户
+        users.push(newUser);
+        
+        // 保存到本地存储
+        localStorage.setItem('solana_users', JSON.stringify(users));
+        
+        // 处理注册成功
+        handleRegistrationSuccess(newUser);
+        
+        // 添加用户日志
+        addUserLog(email, '用户注册');
+    });
+    
+    // 统一处理注册成功的函数
+    function handleRegistrationSuccess(user) {
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // 检查系统设置
+        const settings = JSON.parse(localStorage.getItem('system_settings') || '{}');
+        
+        // 如果需要邮箱验证
+        if (settings.requireEmailVerification && !user.verified) {
+            errorMessage.textContent = '注册成功！请查收验证邮件以激活账号';
+            errorMessage.style.color = '#34c759';
+            
+            // 3秒后跳转到登录页
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 3000);
+            return;
+        }
+        
+        // 不需要邮箱验证，直接登录
+        errorMessage.textContent = '注册成功！正在跳转...';
+        errorMessage.style.color = '#34c759';
+        
+        // 存储当前用户信息
+        localStorage.setItem('current_user', JSON.stringify({
+            email: user.email,
+            name: user.name
+        }));
+        
+        // 设置登录会话
+        sessionStorage.setItem('login_session', 'true');
+        
+        // 跳转到仪表盘页面
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1500);
+    }
+    
+    // 添加用户日志
+    function addUserLog(email, action) {
+        const userLogs = JSON.parse(localStorage.getItem('user_logs') || '[]');
+        userLogs.unshift({
+            email: email,
+            action: action,
+            timestamp: new Date().toISOString(),
+            ip: '127.0.0.1', // 模拟IP地址
+            userAgent: navigator.userAgent
+        });
+        
+        // 只保留最近100条日志
+        if (userLogs.length > 100) {
+            userLogs.length = 100;
+        }
+        
+        localStorage.setItem('user_logs', JSON.stringify(userLogs));
+    }
+    </script>
+</body>
+</html>

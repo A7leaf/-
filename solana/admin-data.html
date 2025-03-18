@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/admin-data.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div style="display: flex; align-items: center;">
+                <div class="logo">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo">
+                </div>
+                <span class="logo-text">Solana 数据管理</span>
+            </div>
+            <div class="user-info">
+                <span id="adminName">管理员</span>
+                <button id="logoutButton" class="logout-btn">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="nav-links">
+            <a href="admin.html" class="nav-link"><i class="fas fa-users"></i> 用户管理</a>
+            <a href="admin-data.html" class="nav-link"><i class="fas fa-database"></i> 数据管理</a>
+            <a href="admin-settings.html" class="nav-link"><i class="fas fa-cog"></i> 系统设置</a>
+        </div>
+        
+        <div class="data-section">
+            <h2>用户数据</h2>
+            <div class="data-actions">
+                <button id="exportData" class="data-export"><i class="fas fa-download"></i> 导出数据</button>
+                <button id="importData" class="data-import"><i class="fas fa-upload"></i> 导入数据</button>
+            </div>
+            <textarea id="dataContent" class="data-textarea" placeholder="用户数据将显示在这里..."></textarea>
+            <button id="saveData" class="button">保存修改</button>
+        </div>
+        
+        <div class="data-section">
+            <h2>系统日志</h2>
+            <textarea id="logContent" class="data-textarea" placeholder="系统日志将显示在这里..." readonly></textarea>
+            <button id="clearLogs" class="button">清除日志</button>
+        </div>
+    </div>
+
+    <script>
+    // 检查管理员登录状态
+    function checkAdminAuth() {
+        const adminUser = localStorage.getItem('admin_user');
+        if (!adminUser) {
+            alert('请先登录管理员账号');
+            window.location.href = 'admin-login.html';
+            return false;
+        }
+        return true;
+    }
+    
+    // 加载用户数据
+    function loadUserData() {
+        const users = JSON.parse(localStorage.getItem('solana_users') || '[]');
+        document.getElementById('dataContent').value = JSON.stringify(users, null, 2);
+    }
+    
+    // 加载系统日志
+    function loadSystemLogs() {
+        const logs = JSON.parse(localStorage.getItem('system_logs') || '[]');
+        document.getElementById('logContent').value = logs.join('\n');
+    }
+    
+    // 添加系统日志
+    function addSystemLog(action) {
+        const adminUser = JSON.parse(localStorage.getItem('admin_user') || '{}');
+        const username = adminUser.username || '未知用户';
+        
+        const logs = JSON.parse(localStorage.getItem('system_logs') || '[]');
+        const timestamp = new Date().toLocaleString();
+        
+        logs.unshift(`[${timestamp}] ${username}: ${action}`);
+        
+        // 只保留最近100条日志
+        if (logs.length > 100) {
+            logs.length = 100;
+        }
+        
+        localStorage.setItem('system_logs', JSON.stringify(logs));
+        loadSystemLogs();
+    }
+    
+    // 导出数据
+    document.getElementById('exportData').addEventListener('click', function() {
+        const users = JSON.parse(localStorage.getItem('solana_users') || '[]');
+        const dataStr = JSON.stringify(users, null, 2);
+        
+        // 创建下载链接
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'solana_users_' + new Date().toISOString().split('T')[0] + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        addSystemLog('导出用户数据');
+    });
+    
+    // 导入数据
+    document.getElementById('importData').addEventListener('click', function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    document.getElementById('dataContent').value = JSON.stringify(data, null, 2);
+                    
+                    if (confirm('确定要导入这些数据吗？这将覆盖现有用户数据。')) {
+                        localStorage.setItem('solana_users', JSON.stringify(data));
+                        alert('数据导入成功！');
+                        addSystemLog('导入用户数据');
+                    }
+                } catch (error) {
+                    alert('导入失败：无效的JSON格式');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    });
+    
+    // 保存修改
+    document.getElementById('saveData').addEventListener('click', function() {
+        const dataContent = document.getElementById('dataContent').value;
+        
+        try {
+            const data = JSON.parse(dataContent);
+            localStorage.setItem('solana_users', JSON.stringify(data));
+            alert('数据保存成功！');
+            addSystemLog('修改用户数据');
+        } catch (error) {
+            alert('保存失败：无效的JSON格式');
+            console.error(error);
+        }
+    });
+    
+    // 清除日志
+    document.getElementById('clearLogs').addEventListener('click', function() {
+        if (confirm('确定要清除所有系统日志吗？')) {
+            localStorage.setItem('system_logs', JSON.stringify([]));
+            loadSystemLogs();
+            addSystemLog('清除系统日志');
+        }
+    });
+    
+    // 退出登录
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('admin_user');
+        window.location.href = 'admin-login.html';
+    });
+    
+    // 页面加载时检查登录状态并加载数据
+    window.addEventListener('DOMContentLoaded', function() {
+        if (checkAdminAuth()) {
+            loadUserData();
+            loadSystemLogs();
+            
+            // 显示管理员用户名
+            const adminUser = JSON.parse(localStorage.getItem('admin_user') || '{}');
+            document.getElementById('adminName').textContent = adminUser.username || '管理员';
+            
+            // 记录访问日志
+            addSystemLog('访问数据管理页面');
+        }
+    });
+    </script>
+</body>
+</html>

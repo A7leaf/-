@@ -1,0 +1,59 @@
+/* register.css */
+
+.terms {
+    margin-bottom: 20px;
+}
+
+.terms label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    color: #6e6e73;
+}
+
+.terms input[type="checkbox"] {
+    margin-top: 2px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6e6e73;
+}
+
+.input-group {
+    position: relative;
+}
+
+.error-message {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+/* 添加对应的CSS样式
+
+您需要在CSS文件中添加以下样式（可以放在register.css或styles.css中）：
+```css
+/* 分隔线样式 */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #666;
+}
+
+.divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 0 10px;
+}
+
+.divider span {
+    font-size: 14px;
+}

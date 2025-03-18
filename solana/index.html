@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 | Solana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 移除 Netlify Identity 相关代码 -->
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="brand-section">
+                <div class="logo">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo">
+                </div>
+                <h1>登录到 Solana</h1>
+                <p class="subtitle">探索 Web3 的无限可能</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" placeholder="电子邮箱" id="email">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="密码" id="password">
+                </div>
+                <div class="remember-forgot">
+                    <label class="remember">
+                        <input type="checkbox" id="rememberMe">
+                        <span>记住我</span>
+                    </label>
+                    <a href="#" class="forgot-link">忘记密码？</a>
+                </div>
+                <button type="button" class="button" id="loginButton">登录</button>
+                <p class="error-message" id="errorMessage"></p>
+            </div>
+            
+            <div class="divider">
+                <hr><span>或</span><hr>
+            </div>
+
+            <div class="social-login">
+                <button class="social-btn apple">
+                    <i class="fab fa-apple"></i>
+                    使用 Apple 登录
+                </button>
+                <button class="social-btn google">
+                    <i class="fab fa-google"></i>
+                    使用 Google 登录
+                </button>
+            </div>
+            
+            <div class="login-footer">
+                <p>还没有账号？ <a href="register.html" class="link" id="createAccountLink">创建账号</a></p>
+                <p class="admin-link"><a href="admin-login.html" class="link" id="adminLoginLink">管理员登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // API基础URL - 务必放在最前面定义
+    const API_BASE_URL = 'http://182.92.84.86/api';
+    
+    // 添加链接的事件监听器，防止页面导航错误
+    document.getElementById('createAccountLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        // 清除任何可能存在的错误消息
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) errorMessage.textContent = '';
+        
+        // 跳转到注册页面
+        window.location.href = 'register.html';
+    });
+    
+    document.getElementById('adminLoginLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        // 清除任何可能存在的错误消息
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) errorMessage.textContent = '';
+        
+        // 跳转到管理员登录页面
+        window.location.href = 'admin-login.html';
+    });
+    
+    // 检查URL参数，处理可能的返回情况
+    window.addEventListener('DOMContentLoaded', function() {
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnFrom = urlParams.get('from');
+        
+        // 根据返回来源设置适当的消息
+        if (returnFrom === 'register') {
+            // 从注册页面返回
+            console.log('从注册页面返回');
+        } else if (returnFrom === 'admin') {
+            // 从管理员页面返回
+            console.log('从管理员页面返回');
+        }
+        
+        // 检查API服务器状态
+        checkAPIServerStatus();
+    });
+    
+    // 检查API服务器状态的函数
+    function checkAPIServerStatus() {
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // 使用HEAD请求检查API服务器状态
+        fetch(`${API_BASE_URL}/health`, { 
+            method: 'HEAD',
+            mode: 'no-cors' // 允许跨域请求，即使不返回详细信息
+        })
+        .then(() => {
+            console.log('API服务器连接正常');
+        })
+        .catch(error => {
+            console.error('API服务器连接失败:', error);
+            errorMessage.textContent = '警告: API服务器可能不可用，登录功能可能受影响';
+            errorMessage.style.color = '#ff9500'; // 使用警告色
+        });
+    }
+    
+    // 添加社交登录按钮的点击事件
+    document.querySelector('.social-btn.apple').addEventListener('click', function() {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '正在使用 Apple 账号登录...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 模拟登录成功
+        setTimeout(() => {
+            const mockUser = {
+                email: 'apple_user@example.com',
+                user_metadata: { full_name: 'Apple 用户' }
+            };
+            handleLoginSuccess(mockUser);
+        }, 1000);
+    });
+    
+    document.querySelector('.social-btn.google').addEventListener('click', function() {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '正在使用 Google 账号登录...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 模拟登录成功
+        setTimeout(() => {
+            const mockUser = {
+                email: 'google_user@example.com',
+                user_metadata: { full_name: 'Google 用户' }
+            };
+            handleLoginSuccess(mockUser);
+        }, 1000);
+    });
+    
+    // 处理登录成功的函数
+    function handleLoginSuccess(user) {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '登录成功！正在跳转...';
+        errorMessage.style.color = '#34c759';
+        
+        // 保存用户信息到localStorage
+        localStorage.setItem('user_email', user.email);
+        localStorage.setItem('user_name', user.user_metadata.full_name);
+        
+        // 跳转到钱包连接页面
+        setTimeout(() => {
+            window.location.href = 'connect-wallet.html';
+        }, 1000);
+    }
+    
+    // 登录按钮点击事件
+    document.getElementById('loginButton').addEventListener('click', function() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (!email || !password) {
+            errorMessage.textContent = '请填写所有必填字段';
+            errorMessage.style.color = '#ff3b30';
+            return;
+        }
+        
+        errorMessage.textContent = '登录中...';
+        errorMessage.style.color = '#0071e3';
+        
+        // 使用API进行登录验证
+        fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        })
+        .then(response => {
+            // 检查HTTP状态码
+            if (response.status === 500) {
+                throw new Error('服务器内部错误(500)，请联系管理员');
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP错误 ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 登录成功
+                errorMessage.textContent = '登录成功！正在跳转...';
+                errorMessage.style.color = '#34c759';
+                
+                // 保存token到localStorage
+                localStorage.setItem('user_token', data.token);
+                localStorage.setItem('user_email', email);
+                
+                // 跳转到钱包连接页面
+                setTimeout(() => {
+                    window.location.href = 'connect-wallet.html';
+                }, 1000);
+            } else {
+                // 登录失败
+                errorMessage.textContent = data.message || '邮箱或密码错误';
+                errorMessage.style.color = '#ff3b30';
+            }
+        })
+        .catch(error => {
+            console.error('登录请求失败:', error);
+            errorMessage.textContent = error.message || '服务器连接失败，请稍后再试';
+            errorMessage.style.color = '#ff3b30';
+        });
+    });
+</script>
+</body>
+</html>
