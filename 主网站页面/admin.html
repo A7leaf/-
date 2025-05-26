@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园跑腿 - 管理后台</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="admin-styles.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <!-- 引入Vue3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录页面 -->
+        <div class="login-container" v-if="!isLoggedIn">
+            <div class="login-box">
+                <div class="login-header">
+                    <img src="img/logo.png" alt="校园跑腿" width="80" height="80">
+                    <h2>管理员登录</h2>
+                </div>
+                <div class="login-error" v-if="loginError" style="display: block;">
+                    {{ loginError }}
+                </div>
+                <form class="login-form" @submit.prevent="login">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" class="form-control" v-model="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" class="form-control" v-model="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" :disabled="isLoading">
+                        {{ isLoading ? '登录中...' : '登录' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 后台管理界面 -->
+        <div class="admin-container" v-else>
+            <!-- 侧边栏 -->
+            <div class="sidebar" :class="{ active: sidebarActive }">
+                <div class="sidebar-header">
+                    <div class="brand">
+                        <img src="img/logo.png" alt="校园跑腿" class="logo">
+                        <span>校园跑腿</span>
+                    </div>
+                    <div class="sidebar-toggle" @click="toggleSidebar">
+                        <span class="material-icons">menu</span>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <ul>
+                        <li :class="{ active: currentView === 'dashboard' }" @click="setCurrentView('dashboard')">
+                            <span class="material-icons">dashboard</span>
+                            数据概览
+                        </li>
+                        <li :class="{ active: currentView === 'orders' }" @click="setCurrentView('orders')">
+                            <span class="material-icons">receipt_long</span>
+                            订单管理
+                        </li>
+                        <li :class="{ active: currentView === 'users' }" @click="setCurrentView('users')">
+                            <span class="material-icons">people</span>
+                            用户管理
+                        </li>
+                        <li :class="{ active: currentView === 'runners' }" @click="setCurrentView('runners')">
+                            <span class="material-icons">directions_run</span>
+                            跑男管理
+                        </li>
+                        <li :class="{ active: currentView === 'settings' }" @click="setCurrentView('settings')">
+                            <span class="material-icons">settings</span>
+                            系统设置
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="content">
+                <div class="content-header">
+                    <h1>{{ pageTitle }}</h1>
+                    <div class="user-dropdown">
+                        <div class="user-info">
+                            <span class="username">{{ adminName }}</span>
+                            <span class="material-icons">arrow_drop_down</span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="#" @click.prevent="logout">
+                                <span class="material-icons">logout</span>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-body">
+                    <!-- 仪表盘视图 -->
+                    <div class="page-content" v-if="currentView === 'dashboard'">
+                        <div class="stats-cards">
+                            <div class="stats-card">
+                                <div class="stats-icon bg-primary">
+                                    <span class="material-icons">receipt_long</span>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{ stats.totalOrders }}</h3>
+                                    <p>总订单数</p>
+                                </div>
+                            </div>
+
+                            <div class="stats-card">
+                                <div class="stats-icon bg-success">
+                                    <span class="material-icons">check_circle</span>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{ stats.completedOrders }}</h3>
+                                    <p>已完成订单</p>
+                                </div>
+                            </div>
+
+                            <div class="stats-card">
+                                <div class="stats-icon bg-info">
+                                    <span class="material-icons">people</span>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{ stats.totalUsers }}</h3>
+                                    <p>注册用户数</p>
+                                </div>
+                            </div>
+
+                            <div class="stats-card">
+                                <div class="stats-icon bg-warning">
+                                    <span class="material-icons">directions_run</span>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{ stats.totalRunners }}</h3>
+                                    <p>活跃跑男数</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>最近订单</h3>
+                                <a href="#" class="view-all" @click.prevent="setCurrentView('orders')">查看全部</a>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>订单号</th>
+                                            <th>下单时间</th>
+                                            <th>用户</th>
+                                            <th>金额</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="order in recentOrders" :key="order.id">
+                                            <td>{{ order.orderNo }}</td>
+                                            <td>{{ formatDate(order.createTime) }}</td>
+                                            <td>{{ order.userName }}</td>
+                                            <td>¥{{ order.totalAmount }}</td>
+                                            <td>
+                                                <span :class="'status-badge ' + getStatusClass(order.status)">
+                                                    {{ getStatusText(order.status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 订单管理视图 -->
+                    <div class="page-content" v-if="currentView === 'orders'">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>订单管理</h3>
+                                <div class="filters">
+                                    <select class="form-select" v-model="orderFilter.status">
+                                        <option value="">全部状态</option>
+                                        <option value="pending">待接单</option>
+                                        <option value="accepted">已接单</option>
+                                        <option value="delivering">配送中</option>
+                                        <option value="completed">已完成</option>
+                                        <option value="cancelled">已取消</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>订单号</th>
+                                            <th>下单时间</th>
+                                            <th>用户</th>
+                                            <th>跑男</th>
+                                            <th>金额</th>
+                                            <th>状态</th>
+                                            <th class="text-center">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="order in filteredOrders" :key="order.id">
+                                            <td>{{ order.orderNo }}</td>
+                                            <td>{{ formatDate(order.createTime) }}</td>
+                                            <td>{{ order.userName }}</td>
+                                            <td>{{ order.runnerName || '-' }}</td>
+                                            <td>¥{{ order.totalAmount }}</td>
+                                            <td>
+                                                <span :class="'status-badge ' + getStatusClass(order.status)">
+                                                    {{ getStatusText(order.status) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary" @click="viewOrderDetails(order)">查看</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="pagination-container">
+                                    <div class="pagination-info">
+                                        显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, filteredOrders.length) }} 条，共 {{ filteredOrders.length }} 条
+                                    </div>
+                                    <div class="pagination-list">
+                                        <a href="#" class="pagination-item" :class="{ disabled: currentPage === 1 }" @click.prevent="previousPage">
+                                            <span class="material-icons">chevron_left</span>
+                                        </a>
+                                        <a href="#" class="pagination-item" :class="{ active: p === currentPage }" v-for="p in totalPages" :key="p" @click.prevent="goToPage(p)">
+                                            {{ p }}
+                                        </a>
+                                        <a href="#" class="pagination-item" :class="{ disabled: currentPage === totalPages }" @click.prevent="nextPage">
+                                            <span class="material-icons">chevron_right</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户管理视图 -->
+                    <div class="page-content" v-if="currentView === 'users'">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户管理</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>用户名</th>
+                                            <th>注册时间</th>
+                                            <th>手机号</th>
+                                            <th>订单数</th>
+                                            <th class="text-center">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="user in users" :key="user.id">
+                                            <td>{{ user.id }}</td>
+                                            <td>{{ user.username }}</td>
+                                            <td>{{ formatDate(user.registerTime) }}</td>
+                                            <td>{{ user.phone }}</td>
+                                            <td>{{ user.orderCount }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary" @click="viewUserDetails(user)">查看</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 跑男管理视图 -->
+                    <div class="page-content" v-if="currentView === 'runners'">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>跑男管理</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>姓名</th>
+                                            <th>加入时间</th>
+                                            <th>手机号</th>
+                                            <th>完成订单</th>
+                                            <th>评分</th>
+                                            <th class="text-center">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="runner in runners" :key="runner.id">
+                                            <td>{{ runner.id }}</td>
+                                            <td>{{ runner.name }}</td>
+                                            <td>{{ formatDate(runner.joinTime) }}</td>
+                                            <td>{{ runner.phone }}</td>
+                                            <td>{{ runner.completedOrders }}</td>
+                                            <td>{{ runner.rating }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary" @click="viewRunnerDetails(runner)">查看</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 系统设置视图 -->
+                    <div class="page-content" v-if="currentView === 'settings'">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>系统设置</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>设置页面开发中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
